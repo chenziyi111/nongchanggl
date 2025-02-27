@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>智慧农场监测平台</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f0f8ff;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sensor-data {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+
+        .data-card {
+            width: 280px;
+            padding: 15px;
+            margin: 10px;
+            text-align: center;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .temperature-card {
+            background: linear-gradient(135deg, #ff9999, #ff6666);
+        }
+
+        .humidity-card {
+            background: linear-gradient(135deg, #99ccff, #6699ff);
+        }
+
+        .soil-moisture-card {
+            background: linear-gradient(135deg, #99cc66, #669933);
+        }
+
+        .light-intensity-card {
+            background: linear-gradient(135deg, #ffff80, #cccc00);
+        }
+
+        .health-index-card {
+            background: linear-gradient(135deg, #99ff99, #66cc66);
+        }
+
+        .header {
+            margin-bottom: 10px;
+            color: white;
+        }
+
+        .value {
+            font-size: 24px;
+            color: white;
+            margin-bottom: 5px;
+        }
+
+        .chart-container {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .video-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        video {
+            width: 100%;
+            max-width: 640px;
+            height: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>智慧农场实时监测</h1>
+
+        <!-- 传感器数据展示 -->
+        <div class="sensor-data">
+            <!-- 温度 -->
+            <div class="data-card temperature-card">
+                <div class="header">空气温度</div>
+                <div class="value" id="temperature">25℃</div>
+            </div>
+
+            <!-- 湿度 -->
+            <div class="data-card humidity-card">
+                <div class="header">空气湿度</div>
+                <div class="value" id="humidity">60%</div>
+            </div>
+
+            <!-- 土壤湿度 -->
+            <div class="data-card soil-moisture-card">
+                <div class="header">土壤湿度</div>
+                <div class="value" id="soil-moisture">40%</div>
+            </div>
+
+            <!-- 光照强度 -->
+            <div class="data-card light-intensity-card">
+                <div class="header">光照强度</div>
+                <div class="value" id="light-intensity">800 lux</div>
+            </div>
+
+            <!-- 农作物健康指数 -->
+            <div class="data-card health-index-card">
+                <div class="header">农作物健康指数</div>
+                <div class="value" id="health-index">85/100</div>
+            </div>
+        </div>
+
+        <!-- 数据图表 -->
+        <div class="chart-container">
+            <h2>数据变化趋势</h2>
+            <canvas id="sensorChart" width="800" height="400"></canvas>
+        </div>
+
+        <!-- 实时监控视频 -->
+        <div class="video-container">
+            <h2>实时监控视频</h2>
+            <video id="video" width="640" height="480" autoplay></video>
+        </div>
+    </div>
+
+    <!-- 引入 Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // 初始化 Chart.js 图表
+        const sensorChart = new Chart(document.getElementById('sensorChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: [],
+                datasets: [
+                    {
+                        label: '空气温度 (℃)',
+                        data: [],
+                        borderColor: '#FF6384',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        tension: 0.1
+                    },
+                    {
+                        label: '光照强度 (lux)',
+                        data: [],
+                        borderColor: '#36A2EB',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: '时间'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '值'
+                        }
+                    }
+                }
+            }
+        });
+
+        // 模拟传感器数据更新
+        let temperatureData = [];
+        let lightData = [];
+        let timeLabels = [];
+
+        setInterval(function() {
+            // 更新温度
+            const temperature = Math.floor(Math.random() * (40 - 15 + 1)) + 15; // 15 - 40℃
+            document.getElementById('temperature').textContent = `${temperature}℃`;
+            temperatureData.push(temperature);
+
+            // 更新湿度
+            const humidity = Math.floor(Math.random() * (90 - 30 + 1)) + 30; // 30 - 90%
+            document.getElementById('humidity').textContent = `${humidity}%`;
+
+            // 更新土壤湿度
+            const soilMoisture = Math.floor(Math.random() * (80 - 20 + 1)) + 20; // 20 - 80%
+            document.getElementById('soil-moisture').textContent = `${soilMoisture}%`;
+
+            // 更新光照强度
+            const lightIntensity = Math.floor(Math.random() * (1000 - 500 + 1)) + 500; // 500 - 1000 lux
+            document.getElementById('light-intensity').textContent = `${lightIntensity} lux`;
+            lightData.push(lightIntensity);
+
+            // 更新农作物健康指数
+            const healthIndex = Math.floor(Math.random() * (100 - 60 + 1)) + 60; // 60 - 100
+            document.getElementById('health-index').textContent = `${healthIndex}/100`;
+
+            // 更新图表数据
+            const now = new Date().toLocaleTimeString();
+            timeLabels.push(now);
+            sensorChart.data.labels = timeLabels;
+            sensorChart.data.datasets[0].data = temperatureData;
+            sensorChart.data.datasets[1].data = lightData;
+            sensorChart.update();
+
+            // 限制数据长度（可选）
+            if (temperatureData.length > 20) {
+                temperatureData.shift();
+                lightData.shift();
+                timeLabels.shift();
+            }
+        }, 3000); // 每 3 秒更新一次数据
+
+        // 获取摄像头视频流
+        const video = document.getElementById('video');
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ video: true })
+                .then(function(stream) {
+                    video.srcObject = stream;
+                })
+                .catch(function(err) {
+                    console.error('Error accessing the camera.', err);
+                });
+        } else {
+            console.error('getUserMedia is not supported in this browser.');
+        }
+    </script>
+</body>
+</html>
